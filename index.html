@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AMP Growth Units</title>
+    
+    <meta name="theme-color" content="#f8fafc">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles/custom.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        appBg: '#F3F5F7',         /* Very soft premium gray background */
+                        appCard: '#FFFFFF',       /* Pure White */
+                        appText: '#1E293B',       /* Dark Slate for clear reading */
+                        appGreen: '#14532D',      /* Logo's Deep Forest Green */
+                        appLightGreen: '#16A34A', /* Active Growth Green */
+                        appGold: '#D4AF37',       /* Logo's Metallic Gold */
+                    }
+                }
+            }
+        }
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+</head>
+<body class="bg-appBg text-appText font-sans antialiased overflow-x-hidden no-scrollbar">
+    
+    <div id="app" class="min-h-screen w-full max-w-md mx-auto relative bg-appBg shadow-xl border-x border-gray-100">
+        </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+<script type="module" src="src/app.js"></script>
+
+</body>
+</html>
