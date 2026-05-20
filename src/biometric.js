@@ -24,14 +24,21 @@ export const registerBiometric = async (password) => {
         const options = {
             publicKey: {
                 challenge: generateChallenge(),
-                rp: { name: "AMP Growth Units" },
+                rp: { 
+                    name: "AMP Growth Units",
+                    id: window.location.hostname // NAYA: Domain explicit match kiya
+                },
                 user: {
                     id: crypto.getRandomValues(new Uint8Array(16)),
                     name: user.email,
                     displayName: user.fullName || user.email
                 },
-                pubKeyCredParams: [{ type: "public-key", alg: -7 }], // ES256 algorithm
-                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }], 
+                authenticatorSelection: { 
+                    authenticatorAttachment: "platform", 
+                    userVerification: "required",
+                    residentKey: "required" // NAYA: Isse chabi mobile ki memory (Passkey) mein save hogi
+                },
                 timeout: 60000
             }
         };
@@ -71,6 +78,7 @@ export const loginWithBiometric = async (navigateTo, dashboardHTML, setupDashboa
         const options = {
             publicKey: {
                 challenge: generateChallenge(),
+                rpId: window.location.hostname, // NAYA: Login ke time wahi domain ki chabi dhoondhega
                 timeout: 60000,
                 userVerification: "required"
             }
@@ -84,7 +92,7 @@ export const loginWithBiometric = async (navigateTo, dashboardHTML, setupDashboa
 
             Swal.fire({
                 title: 'Verifying Fingerprint...',
-                html: '<div class="py-4"><i class="fa-solid fa-fingerprint fa-bounce text-4xl text-appGreen"></i></div>',
+                html: '<div class="py-4"><i class="fa-solid fa-fingerprint fa-bounce text-4xl text-[#0F6B3F]"></i></div>',
                 showConfirmButton: false,
                 allowOutsideClick: false
             });
@@ -98,6 +106,10 @@ export const loginWithBiometric = async (navigateTo, dashboardHTML, setupDashboa
         }
     } catch (err) {
         console.error("Biometric Login Error:", err);
-        Swal.fire('Authentication Failed', 'Fingerprint did not match or request was cancelled.', 'error');
+        if (err.name === 'NotAllowedError') {
+             Swal.fire('Cancelled', 'Aapne fingerprint login cancel kar diya.', 'info');
+        } else {
+             Swal.fire('Authentication Failed', 'Fingerprint did not match or request was cancelled.', 'error');
+        }
     }
 };

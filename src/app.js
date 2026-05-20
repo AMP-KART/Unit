@@ -378,15 +378,30 @@ const setupLoginEvents = () => {
         btnGoogle.addEventListener('click', async () => {
             try {
                 const result = await signInWithPopup(auth, googleProvider);
-                await set(ref(db, 'users/' + result.user.uid), {
-                    uid: result.user.uid,
-                    fullName: result.user.displayName,
-                    email: result.user.email,
-                    role: "user",
-                    kycStatus: "pending",
-                    totalAGU: 0,
-                    lastLogin: serverTimestamp()
-                });
+                const uid = result.user.uid;
+                const userRef = ref(db, 'users/' + uid);
+                
+                // Pehle check karenge ki database mein user ka data hai ya nahi
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    // Purana User: Sirf lastLogin time update karo (Purana data aur funds delete nahi honge)
+                    await set(ref(db, 'users/' + uid + '/lastLogin'), serverTimestamp());
+                } else {
+                    // Naya User: Pehli baar login kar raha hai toh naya profile set karo
+                    await set(userRef, {
+                        uid: uid,
+                        fullName: result.user.displayName,
+                        email: result.user.email,
+                        role: "user",
+                        kycStatus: "pending",
+                        totalAGU: 0,
+                        totalContribution: 0,
+                        createdAt: serverTimestamp(),
+                        lastLogin: serverTimestamp()
+                    });
+                }
+                
                 Swal.fire({ icon: 'success', title: 'Verified', text: 'Google Login Successful!', showConfirmButton: false, timer: 1500 });
                 setTimeout(() => navigateTo(dashboardHTML, setupDashboardEvents), 1000);
             } catch (error) {
