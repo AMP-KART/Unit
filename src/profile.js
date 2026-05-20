@@ -11,7 +11,7 @@ import { buyAguHTML, setupBuyAguEvents } from './buy-agu.js';
 
 export const profileHTML = `
     <div class="min-h-screen bg-[#F5F7FA] pb-28 font-sans text-[#1C1C1C]">
-        
+
         <div class="bg-white px-6 py-3 shadow-md rounded-b-3xl flex justify-between items-center z-50 sticky top-0 w-full backdrop-blur-md bg-white/95">
             <div class="w-8"></div> 
             <div class="text-center flex flex-col items-center">
@@ -25,10 +25,10 @@ export const profileHTML = `
         </div>
 
         <div class="px-5 mt-6 space-y-6">
-            
+
             <div class="bg-white rounded-3xl p-6 shadow-sm flex flex-col items-center relative">
-                <button id="btn-prof-logout" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <button id="btn-prof-share" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-[#0F6B3F] transition-colors active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 </button>
 
                 <div class="relative group cursor-pointer mb-3" id="avatar-upload-btn">
@@ -128,7 +128,7 @@ export const profileHTML = `
                     </button>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-3xl p-2 shadow-sm border border-gray-50 mb-6">
                 <button id="btn-prof-logout-full" class="w-full flex items-center justify-between p-4 text-red-500 hover:bg-red-50 rounded-2xl transition-colors">
                     <div class="flex items-center gap-3">
@@ -149,7 +149,7 @@ export const profileHTML = `
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 <span class="text-[9px] font-bold">Portfolio</span>
             </button>
-            
+
             <div class="relative -top-4 z-[60]">
                 <button id="btn-prof-footer-buy-agu" class="bg-gradient-to-br from-[#0F6B3F] to-[#16A34A] text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_15px_rgba(20,83,45,0.3)] hover:scale-105 transition-transform active:scale-95 border-4 border-[#F3F5F7]">
                     <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -274,9 +274,33 @@ export const setupProfileEvents = (navigateToCallback, dashboardHTML, setupDashb
             if (result.isConfirmed) { auth.signOut().then(() => { window.location.reload(); }); }
         });
     };
-    
-    document.getElementById('btn-prof-logout').addEventListener('click', handleLogout);
+
     document.getElementById('btn-prof-logout-full').addEventListener('click', handleLogout);
+
+    // NAYA: Web Share API Logic (Mobile Native Share Menu Ke Liye)
+    const btnShare = document.getElementById('btn-prof-share');
+    if (btnShare) {
+        btnShare.addEventListener('click', async () => {
+            const shareData = {
+                title: 'AMP Growth Units',
+                text: 'Join AMP Growth Units and start your investment journey securely!',
+                // Yah direct aapki website ka main link fetch karega
+                url: window.location.origin + window.location.pathname 
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Yadi kisi browser mein share support nahi karta (Laptop aadi), toh link copy ho jayega
+                    await navigator.clipboard.writeText(shareData.url);
+                    Swal.fire({ icon: 'success', title: 'Link Copied', text: 'Website link copied to clipboard!', timer: 1500, showConfirmButton: false });
+                }
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        });
+    }
 
     let currentUpi = "";
     let currentBank = { acc: "", ifsc: "", name: "" };
@@ -287,10 +311,10 @@ export const setupProfileEvents = (navigateToCallback, dashboardHTML, setupDashb
     onValue(userRef, (snapshot) => {
         if(snapshot.exists()) {
             const data = snapshot.val();
-            
+
             document.getElementById('prof-name').innerText = data.fullName || "User";
             document.getElementById('prof-email').innerText = data.email || "No Email";
-            
+
             if(data.upiId) currentUpi = data.upiId;
             if(data.bankDetails) currentBank = data.bankDetails;
 
@@ -298,7 +322,7 @@ export const setupProfileEvents = (navigateToCallback, dashboardHTML, setupDashb
                 const date = new Date(data.createdAt);
                 document.getElementById('prof-joined').innerText = date.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
             }
-            
+
             // NAYA: Live Wallet Balance Fetch
             const currentWalletBalance = data.walletBalance || 0;
             const walletEl = document.getElementById('prof-wallet-balance');
@@ -339,7 +363,7 @@ export const setupProfileEvents = (navigateToCallback, dashboardHTML, setupDashb
     // ========================================================
     const bioStatusText = document.getElementById('bio-status-text');
     const savedActiveUid = localStorage.getItem('bio_active_uid');
-    
+
     // Status Check ki fingerprint pehle se enable hai ya nahi
     if (savedActiveUid && localStorage.getItem(`bio_login_${savedActiveUid}`)) {
         if(bioStatusText) bioStatusText.innerText = "Active ✅";
@@ -379,10 +403,10 @@ export const setupProfileEvents = (navigateToCallback, dashboardHTML, setupDashb
 
     const updateProfileStats = () => {
         const currentValue = aguUnitsCount * liveAguPrice;
-        
+
         const valueEl = document.getElementById('prof-stat-value');
         if (valueEl) valueEl.innerText = "₹" + currentValue.toLocaleString('en-IN', {maximumFractionDigits: 2});
-        
+
         const unitsEl = document.getElementById('prof-stat-units');
         if (unitsEl) unitsEl.innerText = aguUnitsCount.toFixed(2);
     };
