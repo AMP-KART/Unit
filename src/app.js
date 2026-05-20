@@ -20,7 +20,7 @@ const appContainer = document.getElementById('app');
 
 const navigateTo = (viewHTML, setupEvents) => {
     const currentWrapper = appContainer.firstElementChild;
-    
+
     // Fade Out logic: Footer ko exclude karo
     const outElements = currentWrapper ? Array.from(currentWrapper.children).filter(el => !(typeof el.className === 'string' && el.className.includes('fixed bottom'))) : appContainer.children;
 
@@ -30,12 +30,12 @@ const navigateTo = (viewHTML, setupEvents) => {
         duration: 0.2,
         onComplete: () => {
             appContainer.innerHTML = viewHTML;
-            
+
             const newWrapper = appContainer.firstElementChild;
-            
+
             // Fade In logic
             const inElements = newWrapper ? Array.from(newWrapper.children).filter(el => !(typeof el.className === 'string' && el.className.includes('fixed bottom'))) : appContainer.children;
-            
+
             gsap.from(inElements, { y: 15, opacity: 0, duration: 0.3, ease: "power2.out", stagger: 0.03 });
             if (setupEvents) setupEvents();
         }
@@ -44,17 +44,99 @@ const navigateTo = (viewHTML, setupEvents) => {
 
 // --- 1. SPLASH SCREEN ---
 const splashHTML = `
-    <div class="flex flex-col items-center justify-center min-h-screen p-6 text-center relative overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-[80px] opacity-40"></div>
-        <div class="premium-card p-8 w-full relative z-10" id="splash-card">
-            <div class="mb-8">
-                <img src="public/images/logo.png" alt="AGU Logo" class="w-32 h-32 mx-auto drop-shadow-xl object-contain">
+    <div class="flex flex-col items-center justify-center min-h-screen p-6 text-center relative overflow-hidden bg-appBg">
+        <div class="absolute top-[-10%] left-[-10%] w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-[100px] opacity-40 animate-pulse"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-yellow-100 rounded-full mix-blend-multiply filter blur-[80px] opacity-30"></div>
+
+        <div class="p-8 w-full relative z-10 flex flex-col justify-between min-h-[80vh]" id="splash-card">
+            <div class="my-auto space-y-6">
+                <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-green-100 rounded-full blur-xl opacity-50 scale-125"></div>
+                    <img src="public/images/logo.png" alt="AGU Logo" class="w-36 h-36 mx-auto drop-shadow-2xl object-contain relative z-10 animate-bounce" style="animation-duration: 4s;">
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold text-appGreen tracking-tight">AMP Growth Units</h1>
+                    <p class="text-[10px] font-black uppercase tracking-[0.25em] text-appGold mt-1">Community Participation</p>
+                </div>
+                <p class="text-xs text-gray-500 font-medium max-w-xs mx-auto leading-relaxed">
+                    Empowering community partnerships with safe, real-time tracking and transparent profit distribution.
+                </p>
             </div>
-            <h1 class="text-3xl font-extrabold text-appGreen mb-2 tracking-tight">AMP Growth Units</h1>
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-appGold mb-10">Community Participation</p>
-            <button id="btn-get-started" class="w-full bg-appGreen text-white font-bold py-4 px-4 rounded-xl shadow-lg text-lg hover:bg-green-800 transition-colors">
-                Get Started
-            </button>
+
+            <div class="space-y-3 w-full mt-auto">
+                <button id="btn-get-started" class="w-full bg-appGreen text-white font-bold py-4 px-4 rounded-2xl shadow-[0_8px_25px_rgba(20,83,45,0.25)] text-base hover:bg-green-800 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <span>Get Started</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </button>
+
+                <button id="btn-learn-more" class="w-full text-appGreen font-extrabold py-3 text-sm hover:text-green-800 transition-colors flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-book-open text-xs"></i>
+                    <span>Learn How it Works</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="learn-more-sheet" class="fixed inset-0 bg-black/40 z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-end justify-center">
+            <div id="sheet-content" class="bg-white w-full max-w-md rounded-t-[2.5rem] p-6 shadow-[0_-10px_30px_rgba(0,0,0,0.08)] transform translate-y-full transition-transform duration-300 ease-out max-h-[85vh] overflow-y-auto no-scrollbar">
+
+                <div class="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-5 cursor-pointer" id="btn-close-sheet-handle"></div>
+
+                <div class="flex justify-between items-center mb-6">
+                    <div class="text-left">
+                        <h3 class="text-xl font-black text-appText tracking-tight">How AGU Works</h3>
+                        <p class="text-[10px] font-bold text-appGold uppercase tracking-wider mt-0.5">Platform Benefits & Features</p>
+                    </div>
+                    <button id="btn-close-sheet" class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4 text-left">
+                    <div class="flex items-start gap-4 p-4 bg-gray-50/70 border border-gray-100 rounded-2xl">
+                        <div class="w-10 h-10 shrink-0 rounded-xl bg-green-50 text-appLightGreen flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">Live NAV Tracking</h4>
+                            <p class="text-xs text-gray-400 font-semibold mt-0.5 leading-relaxed">Track global unit prices dynamically with real-time analytics. Instant evaluation for buy and liquidations.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 bg-gray-50/70 border border-gray-100 rounded-2xl">
+                        <div class="w-10 h-10 shrink-0 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">Community Profit Sharing</h4>
+                            <p class="text-xs text-gray-400 font-semibold mt-0.5 leading-relaxed">System allocations seamlessly distribute enterprise yields to project category funds and stakeholders safely.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 bg-gray-50/70 border border-gray-100 rounded-2xl">
+                        <div class="w-10 h-10 shrink-0 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-fingerprint"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">Bank-Grade Device Security</h4>
+                            <p class="text-xs text-gray-400 font-semibold mt-0.5 leading-relaxed">Frictionless login validations utilizing native hardware credential scanners paired with secure Google authorization portals.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 bg-gray-50/70 border border-gray-100 rounded-2xl">
+                        <div class="w-10 h-10 shrink-0 rounded-xl bg-amber-50 text-appGold flex items-center justify-center text-lg shadow-sm">
+                            <i class="fa-solid fa-vault"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-800">Instant Liquidity Flows</h4>
+                            <p class="text-xs text-gray-400 font-semibold mt-0.5 leading-relaxed">Enjoy smooth financial processing for wallet recharges via unified transaction gateways directly linked back into bank routes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-sheet-get-started" class="w-full mt-6 bg-appGreen text-white font-bold py-4 rounded-xl shadow-md text-sm transition-all active:scale-95">
+                    Understood, Get Started
+                </button>
+            </div>
         </div>
     </div>
 `;
@@ -84,7 +166,7 @@ const loginHTML = `
                 <button id="btn-login-submit" class="w-full bg-appGreen text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/10 mt-2 hover:bg-green-800 transition-colors">
                     Login Securely
                 </button>
-                
+
                 <button id="btn-biometric-login" class="w-full mt-3 bg-white text-appText border border-gray-200 font-bold py-3.5 rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-gray-50 active:scale-95 transition-all">
                     <i class="fa-solid fa-fingerprint text-lg text-appGreen animate-pulse"></i> Login with Fingerprint
                 </button>
@@ -134,7 +216,7 @@ const signupHTML = `
                     <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Set Password</label>
                     <input type="password" id="signup-password" placeholder="••••••••" class="mt-1 w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none text-appText font-medium focus:border-appGreen transition-all">
                 </div>
-                
+
                 <button id="btn-signup-submit" class="w-full bg-appGreen text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/10 mt-4 hover:bg-green-800 transition-colors">
                     Create Account
                 </button>
@@ -160,7 +242,7 @@ const forgotHTML = `
         </div>
 
         <div class="premium-card p-6 space-y-6">
-            
+
             <div class="border-b border-gray-100 pb-5">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Forgot Email? Find by Mobile</label>
                 <div class="flex gap-2 mt-1">
@@ -169,7 +251,7 @@ const forgotHTML = `
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </div>
-                
+
                 <div id="found-email-container" class="hidden mt-3 bg-green-50 border border-green-200 rounded-xl p-3 flex justify-between items-center">
                     <span id="found-email-text" class="text-sm font-bold text-appGreen truncate"></span>
                     <button id="btn-copy-email" class="text-appGreen hover:text-appGold px-2 py-1 bg-white rounded shadow-sm text-xs font-bold uppercase tracking-wide flex items-center gap-1">
@@ -181,7 +263,7 @@ const forgotHTML = `
             <div>
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">Send Password Reset Link</label>
                 <input type="email" id="forgot-email" placeholder="Enter Email ID" class="mt-1 w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 outline-none text-appText font-medium focus:border-appGreen transition-all">
-                
+
                 <button id="btn-forgot-submit" class="w-full bg-appGreen text-white font-bold py-4 rounded-xl shadow-lg shadow-green-900/10 mt-4 hover:bg-green-800 transition-colors">
                     Send Reset Link
                 </button>
@@ -197,7 +279,7 @@ const forgotHTML = `
 // --- 5. MAIN DASHBOARD SCREEN ---
 const dashboardHTML = `
     <div class="min-h-screen bg-appBg pb-24">
-        
+
         <div class="bg-white px-6 py-3 shadow-md rounded-b-3xl flex justify-between items-center z-50 sticky top-0 w-full backdrop-blur-md bg-white/95">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 shrink-0">
@@ -221,7 +303,7 @@ const dashboardHTML = `
                         <p class="text-[10px] font-bold text-appGreen uppercase tracking-wider mb-1 flex items-center gap-1.5"><i class="fa-solid fa-arrow-trend-up"></i> Live Unit Price (NAV)</p>
                         <h2 class="text-3xl font-black text-appText tracking-tight" id="dash-universal-value">₹10.000</h2>
                     </div>
-                    
+
                     <div class="flex flex-col items-end gap-1.5">
                         <div class="flex bg-gray-50 rounded-md p-0.5 border border-gray-100 shadow-inner" id="chart-time-filters">
                             <button class="filter-time-btn active bg-white text-appGreen shadow-sm rounded text-[9px] font-black px-2 py-1 transition-all" data-range="1M">1M</button>
@@ -230,7 +312,7 @@ const dashboardHTML = `
                             <button class="filter-time-btn text-gray-400 hover:text-gray-600 rounded text-[9px] font-black px-2 py-1 transition-all" data-range="36M">3Y</button>
                             <button class="filter-time-btn text-gray-400 hover:text-gray-600 rounded text-[9px] font-black px-2 py-1 transition-all" data-range="ALL">ALL</button>
                         </div>
-                        
+
                         <div class="px-2 py-1 bg-green-50 rounded-lg text-appGreen text-[10px] font-bold flex items-center gap-1">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
                             <span id="dash-universal-growth" class="text-appGreen">...</span>
@@ -242,7 +324,7 @@ const dashboardHTML = `
 
             <div class="bg-gradient-to-br from-[#0F6B3F] to-[#0a4d2c] rounded-3xl p-5 shadow-lg flex flex-col gap-4 text-white relative overflow-hidden">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                
+
                 <div class="flex justify-between items-start z-10">
                     <div>
                         <p class="text-[9px] text-green-200 font-bold uppercase tracking-wider mb-0.5">Invested Value</p>
@@ -310,7 +392,7 @@ const dashboardHTML = `
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                 <span class="text-[9px] font-bold">Portfolio</span>
             </button>
-            
+
             <div class="relative -top-4">
                 <button id="btn-footer-buy-agu" class="bg-gradient-to-br from-[#0F6B3F] to-[#16A34A] text-white w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-[0_8px_15px_rgba(20,83,45,0.3)] hover:scale-105 transition-transform active:scale-95 border-4 border-[#F3F5F7]">
                     <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
@@ -335,12 +417,55 @@ const dashboardHTML = `
 
 const setupSplashEvents = () => {
     document.getElementById('btn-get-started').addEventListener('click', () => navigateTo(loginHTML, setupLoginEvents));
+
+    // NAYA: Bottom Sheet Open/Close UI Handling Programming
+    const sheet = document.getElementById('learn-more-sheet');
+    const content = document.getElementById('sheet-content');
+    const btnLearn = document.getElementById('btn-learn-more');
+    const btnClose = document.getElementById('btn-close-sheet');
+    const btnCloseHandle = document.getElementById('btn-close-sheet-handle');
+    const btnSheetStart = document.getElementById('btn-sheet-get-started');
+
+    const openSheet = () => {
+        sheet.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            content.classList.remove('translate-y-full');
+        }, 50);
+    };
+
+    const closeSheet = () => {
+        content.classList.add('translate-y-full');
+        setTimeout(() => {
+            sheet.classList.add('opacity-0', 'pointer-events-none');
+        }, 300);
+    };
+
+    if (btnLearn) btnLearn.addEventListener('click', openSheet);
+    if (btnClose) btnClose.addEventListener('click', closeSheet);
+    if (btnCloseHandle) btnCloseHandle.addEventListener('click', closeSheet);
+
+    // Tap outside to close logic
+    if (sheet) {
+        sheet.addEventListener('click', (e) => {
+            if (e.target === sheet) closeSheet();
+        });
+    }
+
+    // Sheet button leads straight to login configuration
+    if (btnSheetStart) {
+        btnSheetStart.addEventListener('click', () => {
+            closeSheet();
+            setTimeout(() => {
+                navigateTo(loginHTML, setupLoginEvents);
+            }, 300);
+        });
+    }
 };
 
 const setupLoginEvents = () => {
     document.getElementById('btn-go-signup').addEventListener('click', () => navigateTo(signupHTML, setupSignupEvents));
     document.getElementById('btn-go-forgot').addEventListener('click', () => navigateTo(forgotHTML, setupForgotEvents));
-    
+
     // NAYA: Biometric Login Click Trigger Handler
     const btnBioLogin = document.getElementById('btn-biometric-login');
     if (btnBioLogin) {
@@ -348,7 +473,7 @@ const setupLoginEvents = () => {
             loginWithBiometric(navigateTo, dashboardHTML, setupDashboardEvents);
         });
     }
-    
+
     const btnLogin = document.getElementById('btn-login-submit');
     btnLogin.addEventListener('click', async () => {
         const email = document.getElementById('login-email').value.trim();
@@ -361,7 +486,7 @@ const setupLoginEvents = () => {
 
         const originalText = btnLogin.innerHTML;
         btnLogin.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Verifying...';
-        
+
         try {
             await signInWithEmailAndPassword(auth, email, password);
             Swal.fire({ icon: 'success', title: 'Login Successful', text: 'Welcome to AGU Dashboard!', showConfirmButton: false, timer: 1500 });
@@ -380,10 +505,10 @@ const setupLoginEvents = () => {
                 const result = await signInWithPopup(auth, googleProvider);
                 const uid = result.user.uid;
                 const userRef = ref(db, 'users/' + uid);
-                
+
                 // Pehle check karenge ki database mein user ka data hai ya nahi
                 const snapshot = await get(userRef);
-                
+
                 if (snapshot.exists()) {
                     // Purana User: Sirf lastLogin time update karo (Purana data aur funds delete nahi honge)
                     await set(ref(db, 'users/' + uid + '/lastLogin'), serverTimestamp());
@@ -401,7 +526,7 @@ const setupLoginEvents = () => {
                         lastLogin: serverTimestamp()
                     });
                 }
-                
+
                 Swal.fire({ icon: 'success', title: 'Verified', text: 'Google Login Successful!', showConfirmButton: false, timer: 1500 });
                 setTimeout(() => navigateTo(dashboardHTML, setupDashboardEvents), 1000);
             } catch (error) {
@@ -413,7 +538,7 @@ const setupLoginEvents = () => {
 
 const setupSignupEvents = () => {
     document.getElementById('btn-go-login').addEventListener('click', () => navigateTo(loginHTML, setupLoginEvents));
-    
+
     const btnSignup = document.getElementById('btn-signup-submit');
     btnSignup.addEventListener('click', async () => {
         const name = document.getElementById('signup-name').value.trim();
@@ -458,7 +583,7 @@ const setupSignupEvents = () => {
 
 const setupForgotEvents = () => {
     document.getElementById('btn-back-login').addEventListener('click', () => navigateTo(loginHTML, setupLoginEvents));
-    
+
     const btnSearchEmail = document.getElementById('btn-search-email');
     btnSearchEmail.addEventListener('click', async () => {
         const phone = document.getElementById('search-phone').value.trim();
@@ -466,24 +591,24 @@ const setupForgotEvents = () => {
              Swal.fire({icon:'warning', title:'Mobile Required', text:'Please enter mobile number to search.', confirmButtonColor: '#14532D'});
              return;
         }
-        
+
         btnSearchEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        
+
         try {
              const usersRef = ref(db, 'users');
              const q = query(usersRef, orderByChild('phone'), equalTo(phone));
              const snapshot = await get(q);
-             
+
              if(snapshot.exists()) {
                  let foundEmail = '';
                  snapshot.forEach((childSnapshot) => {
                      foundEmail = childSnapshot.val().email;
                  });
-                 
+
                  document.getElementById('found-email-text').innerText = foundEmail;
                  document.getElementById('found-email-container').classList.remove('hidden');
                  document.getElementById('forgot-email').value = foundEmail;
-                 
+
              } else {
                  Swal.fire({icon:'error', title:'Not Found', text:'No account linked to this mobile number.', confirmButtonColor: '#14532D'});
                  document.getElementById('found-email-container').classList.add('hidden');
@@ -498,7 +623,7 @@ const setupForgotEvents = () => {
 
     document.getElementById('btn-copy-email').addEventListener('click', () => {
         const emailToCopy = document.getElementById('found-email-text').innerText;
-        
+
         const copyTextToClipboard = (text) => {
             if (navigator.clipboard && window.isSecureContext) {
                 return navigator.clipboard.writeText(text);
@@ -522,7 +647,7 @@ const setupForgotEvents = () => {
             copyBtn.innerHTML = 'COPIED ✓';
             copyBtn.classList.add('bg-appGreen', 'text-white');
             copyBtn.classList.remove('text-appGreen', 'bg-white');
-            
+
             setTimeout(() => {
                 copyBtn.innerHTML = 'COPY';
                 copyBtn.classList.remove('bg-appGreen', 'text-white');
@@ -556,7 +681,7 @@ const setupForgotEvents = () => {
 
 // --- DASHBOARD EVENTS (GRAPH LOGIC ADDED) ---
 const setupDashboardEvents = () => {
-    
+
     // ApexCharts Universal Graph Initialization (Premium Interactive Version)
     let fundChart = null;
     const initChart = (seriesData, annotationEvents) => {
@@ -600,13 +725,13 @@ const setupDashboardEvents = () => {
                     }
                 }))
             },
-            
+
             markers: {
                 size: 4, 
                 colors: seriesData.map(d => d.type ? (d.type === 'BUY' ? '#16A34A' : (d.type === 'PROFIT' ? '#8B5CF6' : '#DC2626')) : '#16A34A'),
                 strokeColors: '#ffffff', strokeWidth: 2, hover: { size: 6 } 
             },
-            
+
             tooltip: { 
                 enabled: true,
                 theme: 'light',
@@ -617,7 +742,7 @@ const setupDashboardEvents = () => {
                     const txColor = isSell ? 'text-red-600' : (isProfit ? 'text-purple-600' : 'text-green-600');
                     const txType = isSell ? 'SELL' : (isProfit ? 'PROFIT' : 'BUY');
                     const amt = data.txAmount ? data.txAmount : data.y;
-                    
+
                     return `
                     <div class="p-3 bg-white border border-gray-100 shadow-lg rounded-xl">
                         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">${new Date(data.x).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'})}</p>
@@ -638,12 +763,12 @@ const setupDashboardEvents = () => {
 
     auth.onAuthStateChanged((user) => {
         if (user) {
-            
+
             // 2. UNIVERSAL GRAPH AGGREGATION LOGIC (With Names & Filters)
             const allAguRef = ref(db, 'agu_purchases/');
             const usersDirRef = ref(db, 'users/');
             const masterDistRef = ref(db, 'master_distributions/');
-            
+
             let rawUniversalEvents = []; 
             let rawProfitEvents = [];
             let usersDirectory = {};
@@ -681,7 +806,7 @@ const setupDashboardEvents = () => {
                         const uid = userNode.key;
                         userNode.forEach((txNode) => {
                             const tx = txNode.val();
-                            
+
                             if (tx.purchaseDate && (tx.status === 'approved' || tx.status === 'liquidated' || tx.status === 'liquidated_sold')) {
                                 rawUniversalEvents.push({ date: tx.purchaseDate, amount: tx.amountPaid || 0, type: 'BUY', uid: uid });
                             }
@@ -698,10 +823,10 @@ const setupDashboardEvents = () => {
             const rebuildUniversalSeries = () => {
                 let combinedEvents = [...rawUniversalEvents, ...rawProfitEvents];
                 combinedEvents.sort((a, b) => a.date - b.date);
-                
+
                 let fullSeries = [];
                 let universalTotal = 0;
-                
+
                 if(combinedEvents.length === 0) {
                     fullSeries.push({x: Date.now() - 86400000, y: 0, txAmount: 0, type: 'BUY', userName: ''});
                     fullSeries.push({x: Date.now(), y: 0, txAmount: 0, type: 'BUY', userName: ''});
@@ -709,9 +834,9 @@ const setupDashboardEvents = () => {
                     combinedEvents.forEach(e => {
                         if (e.type === 'BUY' || e.type === 'PROFIT') { universalTotal += e.amount; }
                         else if (e.type === 'SELL') { universalTotal -= e.amount; if(universalTotal < 0) universalTotal = 0; }
-                        
+
                         const uName = e.type === 'PROFIT' ? 'System Split' : (usersDirectory[e.uid] ? (usersDirectory[e.uid].fullName || 'Investor') : 'Investor');
-                        
+
                         let adjustedTime = e.date;
                         if (fullSeries.length > 0 && fullSeries[fullSeries.length - 1].x === e.date) {
                             adjustedTime += 1000; 
@@ -733,7 +858,7 @@ const setupDashboardEvents = () => {
                 else if (currentChartRange === '12M') cutoffTime = now - (365 * 24 * 60 * 60 * 1000);
                 else if (currentChartRange === '24M') cutoffTime = now - (2 * 365 * 24 * 60 * 60 * 1000);
                 else if (currentChartRange === '36M') cutoffTime = now - (3 * 365 * 24 * 60 * 60 * 1000);
-                
+
                 let displaySeries = cutoffTime > 0 ? fullSeries.filter(d => d.x >= cutoffTime) : fullSeries;
                 if (displaySeries.length === 0) displaySeries = [{x: Date.now(), y: universalTotal, txAmount: 0, type: 'BUY', userName: ''}];
 
@@ -763,7 +888,7 @@ const setupDashboardEvents = () => {
                             colors: displaySeries.map(d => d.type ? (d.type === 'BUY' ? '#16A34A' : (d.type === 'PROFIT' ? '#8B5CF6' : '#DC2626')) : '#16A34A')
                         }
                     }, false, false);
-                    
+
                     fundChart.updateSeries([{ data: displaySeries }], true);
                 }
             };
@@ -776,7 +901,7 @@ const setupDashboardEvents = () => {
                     });
                     e.target.classList.add('active', 'bg-white', 'text-appGreen', 'shadow-sm');
                     e.target.classList.remove('text-gray-400');
-                    
+
                     currentChartRange = e.target.getAttribute('data-range');
                     rebuildUniversalSeries(); 
                 });
@@ -789,32 +914,32 @@ const setupDashboardEvents = () => {
             const aguRef = ref(db, 'agu_purchases/' + user.uid);
             const walletRef = ref(db, 'wallet_recharges/' + user.uid);
             const livePriceRef = ref(db, 'platform_settings/agu_price');
-            
+
             let transactionsList = [];
             let aguTotal = 0;
             let aguUnits = 0;
             let walletBalance = 0;
             let liveAguPrice = 10; 
-            
+
             const updatePersonalDashboardUI = () => {
                 const personalInvestedValue = aguTotal;
                 const currentValue = aguUnits * liveAguPrice;
-                
+
                 const invValEl = document.getElementById('dash-invested-value');
                 if(invValEl) invValEl.innerText = "₹" + personalInvestedValue.toLocaleString('en-IN');
-                
+
                 const invUnitEl = document.getElementById('dash-invested-units');
                 if(invUnitEl) invUnitEl.innerText = aguUnits.toFixed(2);
 
                 const currValEl = document.getElementById('dash-current-value');
                 if(currValEl) currValEl.innerText = "₹" + currentValue.toLocaleString('en-IN', {maximumFractionDigits: 2});
-                
+
                 const currUnitEl = document.getElementById('dash-current-units');
                 if(currUnitEl) currUnitEl.innerText = aguUnits.toFixed(2);
 
                 const walletEl = document.getElementById('dash-wallet-balance');
                 if(walletEl) walletEl.innerText = "₹" + walletBalance.toLocaleString('en-IN', {maximumFractionDigits: 2});
-                
+
                 const activityContainer = document.getElementById('dash-recent-activity');
                 if(!activityContainer) return;
 
@@ -822,10 +947,10 @@ const setupDashboardEvents = () => {
                     activityContainer.innerHTML = `<div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 flex items-center justify-center h-32"><p class="text-gray-400 text-sm font-medium">No recent transactions</p></div>`;
                     return;
                 }
-                
+
                 transactionsList.sort((a, b) => b.timestamp - a.timestamp);
                 const recentTx = transactionsList.slice(0, 3);
-                
+
                 activityContainer.innerHTML = recentTx.map(t => {
                     let txDetail = "";
                     let iconTheme = "";
@@ -845,7 +970,7 @@ const setupDashboardEvents = () => {
                         iconTheme = "bg-purple-50 text-purple-500";
                         iconSvg = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
                     }
-                    
+
                     const whatsappMsg = `AMP Growth Units\n\n${txDetail}\n\nMain payment kar chuka hun lekin yah abhi bhi pending hai check and approved.`;
                     const whatsappLink = `https://wa.me/917903698180?text=${encodeURIComponent(whatsappMsg)}`;
 
@@ -882,12 +1007,12 @@ const setupDashboardEvents = () => {
                 } else {
                     liveAguPrice = 10;
                 }
-                
+
                 const universalValEl = document.getElementById('dash-universal-value');
                 const universalGrowthEl = document.getElementById('dash-universal-growth');
-                
+
                 if(universalValEl) universalValEl.innerText = "₹" + liveAguPrice.toFixed(3);
-                
+
                 if(universalGrowthEl) {
                     const navGrowth = ((liveAguPrice - 10) / 10) * 100;
                     universalGrowthEl.innerText = navGrowth > 0 ? "+" + navGrowth.toFixed(2) + "%" : navGrowth.toFixed(2) + "%";
